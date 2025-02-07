@@ -89,7 +89,7 @@ Read operations do not have an associated message in the Message task queue.
 Requires:
 - Master mode
 
-@param u8SlaveAddress_ holds the target's I²C address
+@param u8SlaveAddress_ holds the target's Iï¿½C address
 @param pu8RxBuffer_ has the space to save the data
 @param u32Size_ is the number of bytes to receive
 
@@ -162,7 +162,7 @@ Read operations do not have an associated message in the Message task queue.
 Requires:
 - Master mode
 
-@param u8SlaveAddress_ holds the target's I²C address
+@param u8SlaveAddress_ holds the target's Iï¿½C address
 @param u8InternalAddress_ is the slave's internal address to start reading
 @param pu8RxBuffer_ has the space to save the data
 @param u32Size_ is the number of bytes to receive
@@ -236,7 +236,7 @@ Requires:
 - if a transmission is in progress, the node in the buffer that is currently being sent will not 
   be destroyed during this function.
 
-@param u8SlaveAddress_ holds the target's I²C address
+@param u8SlaveAddress_ holds the target's Iï¿½C address
 @param u32Size_ is the number of bytes to send NOT including the address byte
 @param pu8Data_ points to the start of the data to send
 @param eStop_ is the type of operation
@@ -287,6 +287,8 @@ u32 TwiWriteData(u8 u8SlaveAddress_, u32 u32Size_, u8* pu8Data_, TwiStopType eSt
   /* Update array pointers and size */
   TWI_u8MsgQueueCount++;
   TWI_psMsgBufferNext++;
+
+  // Loops to the start of the buffer
   if( TWI_psMsgBufferNext == &TWI_asMessageBuffer[U8_TWI_MSG_BUFFER_SIZE] )
   {
     TWI_psMsgBufferNext = &TWI_asMessageBuffer[0];
