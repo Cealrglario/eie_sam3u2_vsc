@@ -92,6 +92,35 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  u8 u8RxMessage = 0;
+  ErrorStatusType eErrorStatus = SUCCESS;
+
+  eErrorStatus += BladeRequestPin(BLADE_PIN8, PERIPHERAL);
+  eErrorStatus += BladeRequestPin(BLADE_PIN9, PERIPHERAL);
+  
+  if(eErrorStatus)
+  {
+    DebugPrintf("DHT20 Blade pin resources not available\n\r");
+  }
+  else
+  {
+    DebugPrintf("DHT20 Blade pin resources allocated\n\r");
+  }
+
+  /* Ping the sensor to check it's responding by reading its ID byte */
+  TwiWriteReadData(U8_DHT20_I2C_ADDRESS, U8_DHT20_STATUS_CHECK, &u8RxMessage, 1);
+  if(u8RxMessage != U8_DHT20_EXPECTED_STATUS)
+  {
+    eErrorStatus = ERROR;
+  }
+  else
+  {
+    /* Report ID returned */
+    DebugPrintf("DHT20 returned ID: ");
+    DebugPrintNumber(u8RxMessage);
+    DebugLineFeed();
+  }
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {

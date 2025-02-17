@@ -55,7 +55,16 @@ static void UserApp1SM_Error(void);
 /**********************************************************************************************************************
 Constants / Definitions
 **********************************************************************************************************************/
+/* Sensor wait times */
+#define U32_DHT20_WAIT_MEASUREMENT_MS           (u32)80 /* Amount of time in milliseconds to wait for sensor to finish reading measurement */
+#define U32_DHT20_WAIT_INITIALIZATION_MS        (u32)100 /* Amount of time in milliseconds to wait for sensor to initialize internally */
+#define U32_DHT20_WAIT_STATUS_CHECK_MS          (u32)10 /* Amount of time in milliseconds to wait for sensor to reply to status check */
 
+/* Sensor address and commands */
+#define U8_DHT20_I2C_ADDRESS                    (u8)0x38 /* DHT20 sensor's I2C address */
+#define U8_DHT20_STATUS_CHECK                   (u8)0x71 /* Command to send to DHT20 sensor to initiate status check */
+#define U8_DHT20_EXPECTED_STATUS                (u8)0x18 /* Expected reply from DHT20 sensor when performing status check */
+#define U8_DHT20_TRIGGER_MEASUREMENT            (u8)0xAC /* Command to send to the DHT20 sensor to request a new measurement */
 
 #endif /* __USER_APP1_H */
 
