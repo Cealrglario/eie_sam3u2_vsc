@@ -48,6 +48,8 @@ void UserApp1RunActiveState(void);
 State Machine Declarations
 ***********************************************************************************************************************/
 static void UserApp1SM_Idle(void);    
+static void UserApp1SM_WaitInitializeDHT20(void);
+static void UserApp1SM_InitializeDHT20Pins(void);
 static void UserApp1SM_Error(void);         
 
 
@@ -58,7 +60,6 @@ Constants / Definitions
 /* Sensor wait times */
 #define U32_DHT20_WAIT_MEASUREMENT_MS           (u32)80 /* Amount of time in milliseconds to wait for sensor to finish reading measurement */
 #define U32_DHT20_WAIT_INITIALIZATION_MS        (u32)100 /* Amount of time in milliseconds to wait for sensor to initialize internally */
-#define U32_DHT20_WAIT_STATUS_CHECK_MS          (u32)10 /* Amount of time in milliseconds to wait for sensor to reply to status check */
 
 /* Sensor address and commands */
 #define U8_DHT20_I2C_ADDRESS                    (u8)0x38 /* DHT20 sensor's I2C address */

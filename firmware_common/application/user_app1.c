@@ -60,6 +60,7 @@ Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
+static u32 UserApp1_U32Counter = 0;                       /* Counter used to wait for DHT20 wait tasks */
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
 
@@ -92,46 +93,16 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  u8 u8RxMessage = 0;
-  ErrorStatusType eErrorStatus = SUCCESS;
-
-  eErrorStatus += BladeRequestPin(BLADE_PIN8, PERIPHERAL);
-  eErrorStatus += BladeRequestPin(BLADE_PIN9, PERIPHERAL);
-  
-  if(eErrorStatus)
-  {
-    DebugPrintf("DHT20 Blade pin resources not available\n\r");
-  }
-  else
-  {
-    DebugPrintf("DHT20 Blade pin resources allocated\n\r");
-  }
-
-  /* Ping the sensor to check it's responding by reading its ID byte */
-  TwiWriteReadData(U8_DHT20_I2C_ADDRESS, U8_DHT20_STATUS_CHECK, &u8RxMessage, 1);
-  if(u8RxMessage != U8_DHT20_EXPECTED_STATUS)
-  {
-    eErrorStatus = ERROR;
-  }
-  else
-  {
-    /* Report ID returned */
-    DebugPrintf("DHT20 returned ID: ");
-    DebugPrintNumber(u8RxMessage);
-    DebugLineFeed();
-  }
-
-  /* If good initialization, set state to Idle */
+  /* If good initialization, wait for sensor to initialize */
   if( 1 )
   {
-    UserApp1_pfStateMachine = UserApp1SM_Idle;
+    UserApp1_pfStateMachine = UserApp1SM_WaitInitializeDHT20;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_pfStateMachine = UserApp1SM_Error;
   }
-
 } /* end UserApp1Initialize() */
 
   
@@ -166,6 +137,62 @@ void UserApp1RunActiveState(void)
 State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
+/* Wait 100ms to ensure the DHT20 sensor is fully initialized */
+static void UserApp1SM_WaitInitializeDHT20(void) {
+  UserApp1_U32Counter = 0;
+  UserApp1_U32Counter++;
+
+  if (UserApp1_U32Counter == U32_DHT20_WAIT_INITIALIZATION_MS) {
+    UserApp1_pfStateMachine = UserApp1SM_InitializeDHT20Pins;
+  }
+}
+
+static void UserApp1SM_InitializeDHT20Pins(void) {
+  u8 UserApp1_u8ReadByte = 0;
+  ErrorStatusType eErrorStatus = SUCCESS;
+  eErrorStatus += BladeRequestPin(BLADE_PIN8, PERIPHERAL);
+  eErrorStatus += BladeRequestPin(BLADE_PIN9, PERIPHERAL);
+
+  if (eErrorStatus)
+  {
+    DebugPrintf("DHT20 Blade pin resources not available\n\r");
+  } else
+  {
+    DebugPrintf("DHT20 Blade pin resources allocated\n\r");
+  }
+
+  if (eErrorStatus == SUCCESS) {
+    /* Check if sensor is working as expected and is ready to measure */
+    TwiWriteReadData(U8_DHT20_I2C_ADDRESS, U8_DHT20_STATUS_CHECK, &UserApp1_u8ReadByte, 1);
+    if(UserApp1_u8ReadByte == U8_DHT20_EXPECTED_STATUS) {
+      /* Report ID returned */
+      DebugPrintf("DHT20 returned expected ID: ");
+      DebugPrintNumber(UserApp1_u8ReadByte);
+      DebugLineFeed();
+    }
+    else if (UserApp1_u8ReadByte == U8_DHT20_EXPECTED_STATUS) {
+      DebugPrintf("DHT20 returned unexpected ID: ");
+      DebugPrintNumber(UserApp1_u8ReadByte);
+      DebugLineFeed();
+      eErrorStatus = ERROR;
+    } 
+    else {
+      DebugPrintf("Unknown error occured.");
+      DebugLineFeed();
+      eErrorStatus = ERROR;
+    }
+  }
+  
+  /* If sensor check succeeded, proceed */
+  if (eErrorStatus == SUCCESS) {
+    UserApp1_pfStateMachine = UserApp1SM_Idle;
+  }
+  else {
+    UserApp1_pfStateMachine = UserApp1SM_Error;
+  }
+
+}
+
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
