@@ -139,7 +139,6 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait 100ms to ensure the DHT20 sensor is fully initialized */
 static void UserApp1SM_WaitInitializeDHT20(void) {
-  UserApp1_U32Counter = 0;
   UserApp1_U32Counter++;
 
   if (UserApp1_U32Counter == U32_DHT20_WAIT_INITIALIZATION_MS) {
