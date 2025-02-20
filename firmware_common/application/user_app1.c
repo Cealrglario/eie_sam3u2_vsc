@@ -143,6 +143,7 @@ static void UserApp1SM_WaitInitializeDHT20(void) {
   UserApp1_U32Counter++;
 
   if (UserApp1_U32Counter == U32_DHT20_WAIT_INITIALIZATION_MS) {
+    UserApp1_U32Counter = 0;
     UserApp1_pfStateMachine = UserApp1SM_InitializeDHT20Pins;
   }
 }
