@@ -148,7 +148,8 @@ static void UserApp1SM_WaitInitializeDHT20(void) {
 }
 
 static void UserApp1SM_InitializeDHT20Pins(void) {
-  u8 UserApp1_u8ReadByte = 0;
+  u32 UserApp1_u32ReadByte = 0;
+  u8 UserApp1_DHT20CheckStatus = U8_DHT20_STATUS_CHECK;
   ErrorStatusType eErrorStatus = SUCCESS;
   eErrorStatus += BladeRequestPin(BLADE_PIN8, PERIPHERAL);
   eErrorStatus += BladeRequestPin(BLADE_PIN9, PERIPHERAL);
@@ -163,16 +164,19 @@ static void UserApp1SM_InitializeDHT20Pins(void) {
 
   if (eErrorStatus == SUCCESS) {
     /* Check if sensor is working as expected and is ready to measure */
-    TwiWriteReadData(U8_DHT20_I2C_ADDRESS, U8_DHT20_STATUS_CHECK, &UserApp1_u8ReadByte, 1);
-    if(UserApp1_u8ReadByte == U8_DHT20_EXPECTED_STATUS) {
+    UserApp1_u32ReadByte = TwiWriteData(U8_DHT20_I2C_ADDRESS, 1, &UserApp1_DHT20CheckStatus, TWI_NO_STOP);
+    DebugPrintf("Measured byte: ");
+    DebugPrintNumber(UserApp1_u32ReadByte);
+    DebugLineFeed();
+    if(UserApp1_u32ReadByte == U8_DHT20_EXPECTED_STATUS) {
       /* Report ID returned */
       DebugPrintf("DHT20 returned expected ID: ");
-      DebugPrintNumber(UserApp1_u8ReadByte);
+      DebugPrintNumber(UserApp1_u32ReadByte);
       DebugLineFeed();
     }
-    else if (UserApp1_u8ReadByte == U8_DHT20_EXPECTED_STATUS) {
+    else if (UserApp1_u32ReadByte == U8_DHT20_EXPECTED_STATUS) {
       DebugPrintf("DHT20 returned unexpected ID: ");
-      DebugPrintNumber(UserApp1_u8ReadByte);
+      DebugPrintNumber(UserApp1_u32ReadByte);
       DebugLineFeed();
       eErrorStatus = ERROR;
     } 
